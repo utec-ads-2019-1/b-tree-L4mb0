@@ -26,7 +26,7 @@ public:
         if (!root) {
             root = new Node<T>(degree, true);
             root->keys[0] = k;
-            root->size = 1;
+            root->totKeys = 1;
         } else {
             if (root->size == 2*degree - 1){ //if full
                 auto newRoot = new Node<T>(degree, false);

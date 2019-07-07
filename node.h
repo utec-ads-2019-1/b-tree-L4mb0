@@ -63,7 +63,7 @@ public:
         }
     }
 
-    void split(int i, Node *toSplit) {
+    void split(int i, Node<T> *toSplit) {
         auto splitNode = new Node<T>(toSplit -> digri, toSplit -> isLeaf);
         splitNode -> totKeys = digri - 1;
 
@@ -83,7 +83,6 @@ public:
         keys[i] = toSplit -> keys[digri - 1];
 
         totKeys++;
-
     }
 
     void recorrerNodo() {
