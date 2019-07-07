@@ -14,6 +14,7 @@ class BTree;
 template<typename T>
 class Node {
 protected:
+    unsigned int totKeys;
     unsigned int size;
     vector<unsigned int> keys;
     vector<Node<T> *> childs;
@@ -22,14 +23,18 @@ protected:
 
 
 public:
-    Node(unsigned int digri, bool isLeaf = true) : size(0), isLeaf(isLeaf), digri(digri) {
-        keys.resize(digri - 1);
-        childs.resize(digri);
+
+    Node(unsigned int size, bool isLeaf = true) : size(size), isLeaf(isLeaf)
+    {
+        keys.resize(size - 1);
+        childs.resize(size);
+        totKeys = 0;
+        digri = ceil(size/2);
     }
 
     bool search(int key) {
         int i = 0;
-        while (i < size && keys[i] < key) i++;
+        while (i < totKeys && keys[i] < key) i++;
         if (keys[i] == key) return true;
         if (isLeaf) return false;
         return childs[i]->search(key);
@@ -37,7 +42,7 @@ public:
 
 
     void insertNonFull(int k) {
-        int i = size - 1;
+        int i = totKeys - 1;
         if (isLeaf) {
             while (i >= 0 && keys[i] > k) {
                 keys[i + 1] = keys[i];
@@ -45,11 +50,11 @@ public:
             }
 
             keys[i + 1] = k;
-            size++;
+            totKeys++;
         } else {
-            while (i > 0 && keys[i] > k) i--;
+            while (i >= 0 && keys[i] > k) i--;
 
-            if (childs[i + 1]->size == digri - 1) {//if full
+            if (childs[i + 1] -> totKeys == 2*digri - 1) {//if full
                 split(i + 1, childs[i + 1]);
                 if (keys[i + 1] < k) i++;
             }
@@ -59,32 +64,31 @@ public:
     }
 
     void split(int i, Node *toSplit) {
-        auto newNode = new Node(toSplit->digri, toSplit->isLeaf);
-        int dummy = static_cast<int>(floor((digri - 1) / 2));
-        newNode->size = dummy-1;
+        auto splitNode = new Node<T>(toSplit -> digri, toSplit -> isLeaf);
+        splitNode -> totKeys = digri - 1;
 
-        for (int j = 0; j < newNode->size; ++j) newNode->keys[i] = toSplit->keys[dummy + i + 1];
+        for(int j = 0; j < digri - 1; j++)
+            splitNode -> keys[j] = toSplit -> keys[j + digri];
 
-        if (!toSplit->isLeaf)
-            for (int j = 0; j <= newNode->size; ++j)
-                newNode->childs[i] = toSplit->childs[dummy + i + 1];
+        if (!(toSplit -> isLeaf)){
+            for(int j = 0; j < digri; j++)
+                splitNode -> childs[j] = toSplit -> childs [j + digri];
+        }
 
-        toSplit->size = dummy;
+        toSplit -> totKeys = digri - 1;
 
-        for (int j = size + 1; j > i + 1; --j) childs[i] = childs[i - 1];
+        for(int j =  totKeys; j >= i + 1; j--)
+            keys[j+1] = keys[j];
 
-        childs[i + 1] = newNode;
+        keys[i] = toSplit -> keys[digri - 1];
 
-        for (int j = size; j > i; --j) keys[i] = keys[i - 1];
-
-        keys[i] = toSplit->keys[dummy];
-        size++;
+        totKeys++;
 
     }
 
     void recorrerNodo() {
         int i;
-        for (i = 0; i < size; ++i) {
+        for (i = 0; i < totKeys; ++i) {
             if (!isLeaf) {
                 childs[i]->recorrerNodo();
                 cout << keys[i] << " ";

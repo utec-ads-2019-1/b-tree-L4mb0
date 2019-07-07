@@ -28,8 +28,7 @@ public:
             root->keys[0] = k;
             root->size = 1;
         } else {
-            if (root->size < degree - 1) root->insertNonFull(k);
-            else { //if full
+            if (root->size == 2*degree - 1){ //if full
                 auto newRoot = new Node<T>(degree, false);
                 newRoot->childs[0] = root;
                 newRoot->split(0, root);
@@ -41,6 +40,7 @@ public:
 
                 root = newRoot;
             }
+            else  root->insertNonFull(k);
         }
         return true;
     }
